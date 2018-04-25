@@ -12,6 +12,11 @@ use std::path;
 #[derive(Debug)]
 pub struct TextAttr {
     pub font_name: String,
+    pub font_size: f64,
+    pub is_underlined: bool,
+    pub red: u16,
+    pub green: u16,
+    pub blue: u16,
     pub start_index: i32,
     pub end_index: i32
 }
@@ -25,6 +30,11 @@ impl glib::translate::FromGlibPtrNone<*const ffi::PopplerTextAttributes> for Tex
         let p = &*ptr;
         let attr = TextAttr {
             font_name: std::ffi::CStr::from_ptr(p.font_name).to_str().unwrap().to_string(),
+            font_size: p.font_size,
+            is_underlined: glib::translate::from_glib(p.is_underlined),
+            red: p.color.red,
+            green: p.color.green,
+            blue: p.color.blue,
             start_index: p.start_index,
             end_index: p.end_index
         };
@@ -37,6 +47,11 @@ impl glib::translate::FromGlibPtrFull<*const ffi::PopplerTextAttributes> for Tex
         let p = &*ptr;
         let attr = TextAttr {
             font_name: std::ffi::CStr::from_ptr(p.font_name).to_str().unwrap().to_string(),
+            font_size: p.font_size,
+            is_underlined: glib::translate::from_glib(p.is_underlined),
+            red: p.color.red,
+            green: p.color.green,
+            blue: p.color.blue,
             start_index: p.start_index,
             end_index: p.end_index
         };
