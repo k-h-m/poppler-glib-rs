@@ -17,8 +17,8 @@ pub struct TextAttr {
     pub red: u16,
     pub green: u16,
     pub blue: u16,
-    pub start_index: i32,
-    pub end_index: i32
+    pub start_index: usize,
+    pub end_index: usize
 }
 
 impl glib::translate::GlibPtrDefault for TextAttr {
@@ -28,6 +28,7 @@ impl glib::translate::GlibPtrDefault for TextAttr {
 impl glib::translate::FromGlibPtrNone<*const ffi::PopplerTextAttributes> for TextAttr {
     unsafe fn from_glib_none(ptr: *const ffi::PopplerTextAttributes) -> Self {
         let p = &*ptr;
+        assert!(p.start_index >=0 && p.end_index >= p.start_index);
         let attr = TextAttr {
             font_name: std::ffi::CStr::from_ptr(p.font_name).to_str().unwrap().to_string(),
             font_size: p.font_size,
@@ -35,8 +36,8 @@ impl glib::translate::FromGlibPtrNone<*const ffi::PopplerTextAttributes> for Tex
             red: p.color.red,
             green: p.color.green,
             blue: p.color.blue,
-            start_index: p.start_index,
-            end_index: p.end_index
+            start_index: p.start_index as usize,
+            end_index: p.end_index as usize
         };
         attr
     }
@@ -45,6 +46,7 @@ impl glib::translate::FromGlibPtrNone<*const ffi::PopplerTextAttributes> for Tex
 impl glib::translate::FromGlibPtrFull<*const ffi::PopplerTextAttributes> for TextAttr {
     unsafe fn from_glib_full(ptr: *const ffi::PopplerTextAttributes) -> Self {
         let p = &*ptr;
+        assert!(p.start_index >=0 && p.end_index >= p.start_index);
         let attr = TextAttr {
             font_name: std::ffi::CStr::from_ptr(p.font_name).to_str().unwrap().to_string(),
             font_size: p.font_size,
@@ -52,8 +54,8 @@ impl glib::translate::FromGlibPtrFull<*const ffi::PopplerTextAttributes> for Tex
             red: p.color.red,
             green: p.color.green,
             blue: p.color.blue,
-            start_index: p.start_index,
-            end_index: p.end_index
+            start_index: p.start_index as usize,
+            end_index: p.end_index as usize
         };
         attr
     }
