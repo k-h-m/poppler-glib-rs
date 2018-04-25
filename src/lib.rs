@@ -3,7 +3,7 @@ extern crate glib;
 extern crate glib_sys;
 extern crate gobject_sys;
 
-mod ffi;
+pub mod ffi;
 mod util;
 
 use std::ffi::CString;
