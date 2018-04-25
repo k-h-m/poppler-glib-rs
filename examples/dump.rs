@@ -19,7 +19,7 @@ fn run() -> Result<(), glib::error::Error> {
 
         let text = page.get_text();
         let text_lossy = page.get_text_lossy();
-        let layout = page.get_text_layout();
+        let layout = page.get_text_layout().unwrap();
         let bb = text.chars().fold(0, |n, _| n + 1);
         assert!(bb == layout.len());
         println!("exact={}, lossy={}, bb={}", text.len(), text_lossy.len(), bb);

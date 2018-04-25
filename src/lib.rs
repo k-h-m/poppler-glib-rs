@@ -134,14 +134,19 @@ impl PopplerPage {
         }
     }
 
-    pub fn get_text_layout(&self) -> &[ffi::PopplerRectangle] {
+    pub fn get_text_layout(&self) -> Result<&[ffi::PopplerRectangle],glib::error::Error> {
         unsafe {
             let mut arr: *mut ffi::PopplerRectangle = std::ptr::null_mut();
             let mut len: c_uint = 0;
             let res = ffi::poppler_page_get_text_layout(self.0, &mut arr, &mut len);
             let b: bool = glib::translate::from_glib(res);
-            assert!(b);
-            std::slice::from_raw_parts(arr, len as usize)
+            if !b {
+                return Err(glib::error::Error::new(
+                    glib::FileError::Failed,
+                    "XXX I DON'T KNOW",
+                ))
+            }
+            Ok(std::slice::from_raw_parts(arr, len as usize))
         }
     }
 
