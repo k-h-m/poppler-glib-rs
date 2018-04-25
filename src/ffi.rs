@@ -9,7 +9,7 @@ use glib_sys;
 pub enum PopplerDocument {}
 pub enum PopplerPage {}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[repr(C)]
 pub struct PopplerRectangle {
     pub x1: c_double,
@@ -65,4 +65,6 @@ extern "C" {
                               n_rectangles: *mut c_uint) -> glib_sys::gboolean;
 
     pub fn poppler_page_get_text_attributes(page: *mut PopplerPage) -> *const glib_sys::GList;
+
+    pub fn poppler_page_free_text_attributes(list: *const glib_sys::GList);
 }

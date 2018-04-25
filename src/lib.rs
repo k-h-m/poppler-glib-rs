@@ -1,5 +1,7 @@
+extern crate libc;
 extern crate glib;
 extern crate glib_sys;
+extern crate gobject_sys;
 
 mod ffi;
 mod util;
@@ -104,6 +106,14 @@ impl PopplerDocument {
 }
 
 
+impl Drop for PopplerDocument {
+    fn drop(&mut self) {
+        unsafe {
+            gobject_sys::g_object_unref(self.0 as *mut gobject_sys::GObject);
+        }
+    }
+}
+
 impl PopplerPage {
     pub fn get_size(&self) -> (f64, f64) {
         let mut width: f64 = 0.0;
@@ -120,21 +130,25 @@ impl PopplerPage {
         (width, height)
     }
 
-    pub fn get_text(&self) -> &str {
+    pub fn get_text(&self) -> String {
         unsafe {
-            let s = std::ffi::CStr::from_ptr(ffi::poppler_page_get_text(self.0));
-            s.to_str().unwrap()
+            let p = ffi::poppler_page_get_text(self.0);
+            let s = String::from(std::ffi::CStr::from_ptr(p).to_str().unwrap());
+            libc::free(p as *mut libc::c_void);
+            s
         }
     }
 
     pub fn get_text_lossy(&self) -> String {
         unsafe {
-            let s = std::ffi::CStr::from_ptr(ffi::poppler_page_get_text(self.0));
-            s.to_string_lossy().into_owned()
+            let p = ffi::poppler_page_get_text(self.0);
+            let s = std::ffi::CStr::from_ptr(p).to_string_lossy().into_owned();
+            libc::free(p as *mut libc::c_void);
+            s
         }
     }
 
-    pub fn get_text_layout(&self) -> Result<&[ffi::PopplerRectangle],glib::error::Error> {
+    pub fn get_text_layout(&self) -> Result<Vec<ffi::PopplerRectangle>,glib::error::Error> {
         unsafe {
             let mut arr: *mut ffi::PopplerRectangle = std::ptr::null_mut();
             let mut len: c_uint = 0;
@@ -142,22 +156,31 @@ impl PopplerPage {
             let b: bool = glib::translate::from_glib(res);
             if !b {
                 return Err(glib::error::Error::new(
-                    glib::FileError::Failed,
-                    "XXX I DON'T KNOW",
-                ))
+                    glib::FileError::Failed, "XXX I DON'T KNOW",))
             }
-            Ok(std::slice::from_raw_parts(arr, len as usize))
+            let res = Vec::from(std::slice::from_raw_parts(arr, len as usize));
+            glib_sys::g_free(arr as *mut libc::c_void);
+            Ok(res)
         }
     }
 
     pub fn get_text_attributes(&self) -> Vec<TextAttr> {
         unsafe {
             let ll = ffi::poppler_page_get_text_attributes(self.0);
-            glib::translate::FromGlibPtrArrayContainerAsVec::from_glib_none_as_vec(ll)
+            let res = glib::translate::FromGlibPtrArrayContainerAsVec::from_glib_none_as_vec(ll);
+            ffi::poppler_page_free_text_attributes(ll);
+            res
         }
     }
 }
 
+impl Drop for PopplerPage {
+    fn drop(&mut self) {
+        unsafe {
+            gobject_sys::g_object_unref(self.0 as *mut gobject_sys::GObject);
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct PoppperPageRef {
