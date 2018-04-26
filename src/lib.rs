@@ -13,7 +13,7 @@ use std::path;
 
 #[derive(Debug)]
 pub struct TextAttr {
-    pub font_name: String,
+    pub font_name: Option<String>,
     pub font_size: f64,
     pub is_underlined: bool,
     pub red: u16,
@@ -32,7 +32,9 @@ impl glib::translate::FromGlibPtrNone<*const ffi::PopplerTextAttributes> for Tex
         let p = &*ptr;
         assert!(p.start_index >=0 && p.end_index >= p.start_index);
         let attr = TextAttr {
-            font_name: std::ffi::CStr::from_ptr(p.font_name).to_str().unwrap().to_string(),
+            font_name: match std::ffi::CStr::from_ptr(p.font_name).to_str() {
+                        Err(_) => None,
+                        Ok(x) => Some(x.to_string())},
             font_size: p.font_size,
             is_underlined: glib::translate::from_glib(p.is_underlined),
             red: p.color.red,
@@ -50,7 +52,9 @@ impl glib::translate::FromGlibPtrFull<*const ffi::PopplerTextAttributes> for Tex
         let p = &*ptr;
         assert!(p.start_index >=0 && p.end_index >= p.start_index);
         let attr = TextAttr {
-            font_name: std::ffi::CStr::from_ptr(p.font_name).to_str().unwrap().to_string(),
+            font_name: match std::ffi::CStr::from_ptr(p.font_name).to_str() {
+                        Err(_) => None,
+                        Ok(x) => Some(x.to_string())},
             font_size: p.font_size,
             is_underlined: glib::translate::from_glib(p.is_underlined),
             red: p.color.red,
