@@ -97,10 +97,14 @@ impl PopplerDocument {
         (unsafe { ffi::poppler_document_get_n_pages(self.0) }) as usize
     }
 
-    pub fn get_page(&self, index: usize) -> Option<PopplerPage> {
+    pub fn get_page(&self, index: usize) -> Result<PopplerPage, glib::error::Error> {
         match unsafe { ffi::poppler_document_get_page(self.0, index as c_int) } {
-            ptr if ptr.is_null() => None,
-            ptr => Some(PopplerPage(ptr)),
+            ptr if ptr.is_null() => Err(
+                glib::error::Error::new(
+                    glib::FileError::Failed,
+                    "poppler-glib-rs: Unknown error in function ffi::popler_document_get_page",)
+                ),
+            ptr => Ok(PopplerPage(ptr)),
         }
     }
 }
@@ -148,7 +152,7 @@ impl PopplerPage {
         }
     }
 
-    pub fn get_text_layout(&self) -> Result<Vec<ffi::PopplerRectangle>,glib::error::Error> {
+    pub fn get_text_layout(&self) -> Result<Vec<ffi::PopplerRectangle>, glib::error::Error> {
         unsafe {
             let mut arr: *mut ffi::PopplerRectangle = std::ptr::null_mut();
             let mut len: c_uint = 0;
@@ -156,7 +160,8 @@ impl PopplerPage {
             let b: bool = glib::translate::from_glib(res);
             if !b {
                 return Err(glib::error::Error::new(
-                    glib::FileError::Failed, "XXX I DON'T KNOW",))
+                    glib::FileError::Failed, 
+                    "poppler-glib-rs: Unknown error in function ffi::poppler_page_get_text_layout",))
             }
             let res = Vec::from(std::slice::from_raw_parts(arr, len as usize));
             glib_sys::g_free(arr as *mut libc::c_void);
