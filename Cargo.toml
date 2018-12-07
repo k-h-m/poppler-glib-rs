@@ -2,6 +2,7 @@
 name = "poppler"
 version = "0.1.0"
 authors = ["k-h-m"]
+edition = "2018"
 
 [dependencies]
 libc = "0.2.0"
